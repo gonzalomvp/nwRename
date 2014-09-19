@@ -14,6 +14,9 @@ automatically.
 Screenshot (text too large to fit github preview thingy):
 ![Screenshot](https://raw.github.com/a442/nwRename/master/screenshot.png "Screenshot")
 
+Note: Running with "-e avi" would'v fixed the wrong episode numbering, but I 
+didn't want to rename the video files.
+
 ```
 usage: python nwRename.py [-h] [--no-backup] [-e [EXTENSION]] [dir]
 
