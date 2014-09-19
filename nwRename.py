@@ -52,7 +52,8 @@ def is_to_be_renamed(file):
 
 def abort(msg=''):
 	
-	raise SystemExit('Aborted.\n'+msg)
+	raise SystemExit("Aborted.\n"+msg+"\nIf you think this shouldn't've " \
+"happened, please report it to https://github.com/a442/")
 
 def pair_up(files):
 	
@@ -72,7 +73,12 @@ def pair_up(files):
 		alignments = [align.Alignment(ren_from, ren_to) for ren_to in rename_to]
 		scores = [a.getAlignmentScore() for a in alignments]
 		chosen = scores.index(max(scores))
-		aligned.append(rename_to[chosen])
+		if not rename_to[chosen] in aligned:
+			aligned.append(rename_to[chosen])
+		else:
+			abort("Couldn't determine which file to rename {} to. The best " \
+"candidate, {}, is already what {} was selected to be renamed to.".format(
+					ren_from, rename_to[chosen], to_be_renamed[chosen]))
 		sys.stdout.write(' {} out of {} done\r'.format(done, total_to_rename))
 		sys.stdout.flush()
 		done += 1
@@ -102,7 +108,7 @@ def ask_confirmation_and_rename(to_be_renamed, aligned):
 				args.dir+aligned[i][:-4]+'.'+args.extension
 			)
 	except KeyboardInterrupt:
-		abort("If it was wrong, please report to https://github.com/a442")	
+		abort()
 	print 'Done.'
 
 def list_files():
