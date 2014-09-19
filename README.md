@@ -4,6 +4,13 @@ counterparts, based on filename similarity.
 Originally concieved to bulk rename subtitle files with one naming pattern to 
 the correspondent video files (which followed a different naming pattern).
 
+Example:
+
+These hypothetically downloaded video files came with the wrong episode numbers 
+and a completely different naming pattern from the subtitles. That'd be a pain 
+in the ass to fix manually. Simply run nwRename and the job is done 
+automatically.
+
 Screenshot (text too large to fit github preview thingy):
 ![Screenshot](https://raw.github.com/a442/nwRename/master/screenshot.png "Screenshot")
 
