@@ -46,7 +46,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-def issub(file):
+def is_to_be_renamed(file):
 	
 	return re.findall('\.'+args.extension+'$', file)
 
@@ -55,35 +55,35 @@ def abort(msg=''):
 	raise SystemExit('Aborted.\n'+msg)
 
 def pair_up(files):
-	subs = []
-	vids = []
+	
+	to_be_renamed = []
+	rename_to = []
 	for f in files:
-		if issub(f):
-			subs.append(f)
+		if is_to_be_renamed(f):
+			to_be_renamed.append(f)
 		else:
-			vids.append(f)
-	if len(subs) != len(vids):
-		print "Different number of files with one extension than with other. " \
-"This results in undefined behaviour, but should work..."
-	aligned_vids = []
-	i = 0
-	n = len(subs)
-	for s in subs:
-		alignments = [align.Alignment(s, v) for v in vids]
+			rename_to.append(f)
+	total_to_rename = len(to_be_renamed)
+	if total_to_rename > len(rename_to):
+		abort('There are more files to be renamed than files to rename to.')
+	aligned = []
+	done = 0
+	for ren_from in to_be_renamed:
+		alignments = [align.Alignment(ren_from, ren_to) for ren_to in rename_to]
 		scores = [a.getAlignmentScore() for a in alignments]
 		chosen = scores.index(max(scores))
-		aligned_vids.append(vids[chosen])
-		sys.stdout.write(' {} out of {} done\r'.format(i, n))
+		aligned.append(rename_to[chosen])
+		sys.stdout.write(' {} out of {} done\r'.format(done, total_to_rename))
 		sys.stdout.flush()
-		i += 1
-	return subs, aligned_vids
+		done += 1
+	return to_be_renamed, aligned
 		
-
-def ask_confirmation_and_rename(subs, aligned_vids):
+def ask_confirmation_and_rename(to_be_renamed, aligned):
 	
-	print 'Check new filenames before we rename them:'
-	for i in xrange(len(subs)):
-		print aligned_vids[i][:-4]+'.'+args.extension, '<-', subs[i]
+	total_to_rename = len(to_be_renamed)
+	print 'Check the new filenames before we rename them:'
+	for i in xrange(total_to_rename):
+		print aligned[i][:-4]+'.'+args.extension, '<-', to_be_renamed[i]
 	try:
 		in_ = raw_input(
 			"Is that correct? Ctrl+c to stop, enter to continue."
@@ -92,25 +92,24 @@ def ask_confirmation_and_rename(subs, aligned_vids):
 			print 'Backing up files to '+args.dir+'backup...'
 			if not os.path.exists(args.dir+'backup'):
 				os.makedirs(args.dir+'backup')
-			for ep in subs:
+			for ep in to_be_renamed:
 				shutil.copy2(args.dir+ep, args.dir+'backup/'+ep)
 			print 'Done.'
 		print 'Renaming...'
-		for i in xrange(len(subs)):
+		for i in xrange(total_to_rename):
 			os.rename(
-				args.dir+subs[i],
-				args.dir+aligned_vids[i][:-4]+'.'+args.extension
+				args.dir+to_be_renamed[i],
+				args.dir+aligned[i][:-4]+'.'+args.extension
 			)
 	except KeyboardInterrupt:
-		abort("If you'd like to see this fixed, report it to " \
-"https://github.com/a442")
-	
+		abort("If it was wrong, please report to https://github.com/a442")	
 	print 'Done.'
 
 def list_files():
 	args.dir += '/'
-	return [i for i in os.listdir(args.dir) if os.path.isfile(os.path.join(args.dir,i))	]
+	return [i for i in os.listdir(args.dir) if (
+									os.path.isfile(os.path.join(args.dir,i)))]
 
 if __name__ == '__main__':
-	subs, aligned_vids = pair_up(list_files())
-	ask_confirmation_and_rename(subs, aligned_vids)
+	to_be_renamed, aligned = pair_up(list_files())
+	ask_confirmation_and_rename(to_be_renamed, aligned)
