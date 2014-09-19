@@ -73,8 +73,6 @@ def pair_up(files):
 		scores = [a.getAlignmentScore() for a in alignments]
 		chosen = scores.index(max(scores))
 		aligned_vids.append(vids[chosen])
-		alignments[chosen].align()
-		alignments[chosen].generateCMP()
 		sys.stdout.write(' {} out of {} done\r'.format(i, n))
 		sys.stdout.flush()
 		i += 1
