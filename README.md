@@ -17,8 +17,11 @@ Screenshot (text too large to fit github preview thingy):
 Note: Running with "-e avi" would'v fixed the wrong episode numbering, but I 
 didn't want to rename the video files.
 
+
 ```
-usage: python nwRename.py [-h] [--no-backup] [-e [EXTENSION]] [dir]
+usage: python nwRename.py [-h] [--no-backup] [-e [EXTENSION]]
+                          [--alignment [ALIGNMENTTYPE]]
+                          [dir]
 
 Auto rename files based on similarity.
 
@@ -26,14 +29,17 @@ assumes:
         There are only files of two different 3-letter extensions in the folder.
 
 positional arguments:
-  dir              The directory where the files are (default is the dir from
-                   which this file was called. Use only absolute paths.)
+  dir                   The directory where the files are (default is the dir
+                        from which this file was called. Use only absolute
+                        paths.)
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --no-backup, -n  Don't backup the files before renaming (only the ones with
-                   the provided extension are renamed).
-  -e [EXTENSION]   File extension. Default is .srt.
+  -h, --help            show this help message and exit
+  --no-backup, -n       Don't backup the files before renaming (only the ones
+                        with the provided extension are renamed).
+  -e [EXTENSION]        File extension. Default is .srt.
+  --alignment [ALIGNMENTTYPE], -a [ALIGNMENTTYPE]
+                        Alignment type to be used.
 ```
 
 This software comes with ABSOLUTELY NO WARRANTY.
