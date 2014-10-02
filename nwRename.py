@@ -44,6 +44,16 @@ parser.add_argument(
 	help="The directory where the files are (default is the dir from which " \
 "this file was called. Use only absolute paths.)",
 )
+parser.add_argument(
+	'--alignment',
+	'-a',
+	type=str,
+	default='semi-global',
+	dest='alignmentType',
+	nargs='?',
+	action='store',
+	help="Alignment type to be used.",
+)
 args = parser.parse_args()
 
 def is_to_be_renamed(file):
@@ -53,7 +63,8 @@ def is_to_be_renamed(file):
 def abort(msg=''):
 	
 	raise SystemExit("Aborted.\n"+msg+"\nIf you think this shouldn't've " \
-"happened, please report it to https://github.com/a442/")
+"happened, try calling with \"-a global\"\nIf that doesn't help, please report"\
+" it to https://github.com/a442/")
 
 def pair_up(files):
 	
@@ -70,7 +81,7 @@ def pair_up(files):
 	aligned = []
 	done = 0
 	for ren_from in to_be_renamed:
-		alignments = [align.Alignment(ren_from, ren_to) for ren_to in rename_to]
+		alignments = [align.Alignment(ren_from, ren_to, alignmentType=args.alignmentType) for ren_to in rename_to]
 		scores = [a.getAlignmentScore() for a in alignments]
 		chosen = scores.index(max(scores))
 		if not rename_to[chosen] in aligned:
