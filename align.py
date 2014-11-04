@@ -1,63 +1,38 @@
-# Adhoc class with a few methods for sequence comparison via Needleman-Wunsch
-class Alignment:
+class Scores:
+	def __init__(self, match=2, miss=-1, gap=-1, edge=-1):
+		self.match = match
+		self.miss = miss
+		self.gap = gap
+		self.edge = edge
 
-	def __init__(self, seq1, seq2, matchScore=2, mismatchScore=-1, gapScore=-1, alignmentType='semi-global'):
-		if alignmentType == 'global':
-			self.alignmentType = 'global'
-			self.trailingGapScore = gapScore
-		elif alignmentType == 'semi-global':
-			self.alignmentType = 'semi-global'
-			self.trailingGapScore = 0
-		else:
-			raise ValueError('Invalid alignment type')
-		self.seq1 = list(seq1)
-		self.seq2 = list(seq2)
-		self.matchScore = matchScore
-		self.mismatchScore = mismatchScore
-		self.gapScore = gapScore
-		self.alignmentMatrixNumRows = len(seq1)+1
-		self.alignmentMatrixNumCols = len(seq2)+1
-		self.alignmentMatrix = []
-		self.generateAlignmentMatrix()
+def score(scores, a, b):
+	return scores.match if a == b else scores.miss
 
-	def score(self, i, j):
-		if (self.seq1[i] == self.seq2[j]):
-			return self.matchScore
-		else:
-			return self.mismatchScore
+def generateAM(scores, s1, s2):
+	am = [[0 if j == 0 else j * scores.edge for j in xrange(len(s2)+1)]]
+	for i in xrange(1, len(s1)+1):
+		am.append([])
+		am[i].append(i * scores.edge)
+		for j in xrange(1, len(s2)+1):
+			am[i].append(max(
+				am[i-1][j-1] + score(scores, s1[i-1], s2[j-1]),
+				am[i][j-1] + scores.gap,
+				am[i-1][j] + scores.gap,
+			))
+	return am
 
-	def generateAlignmentMatrix(self):
-		self.alignmentMatrix = []
-		self.alignmentMatrix.append([])
-		self.alignmentMatrix[0].append(0)
-		for i in xrange(1, self.alignmentMatrixNumRows):
-			self.alignmentMatrix.append([])
-			self.alignmentMatrix[i].append(i * self.trailingGapScore)
-			for j in xrange(1, self.alignmentMatrixNumCols):
-				self.alignmentMatrix[0].append(j * self.trailingGapScore)
-				self.alignmentMatrix[i].append(max(
-					self.alignmentMatrix[i-1][j-1] + self.score(i-1, j-1),
-                    self.alignmentMatrix[i][j-1] + self.gapScore,
-                    self.alignmentMatrix[i-1][j] + self.gapScore,
-				))
+def argmax(am):
+	i, j = len(am)-1, len(am[0])-1
+	if len(am) >= len(am[0]):
+		col = [am[i][-1] for i in xrange(len(am))]
+		i =  col.index(max(col))
+	else:
+		j = am[-1].index(max(am[-1]))
+	return i, j
 
-	def argmax(self):
-		ans = []
-		ans.append(self.alignmentMatrixNumRows-1)
-		ans.append(self.alignmentMatrixNumCols-1)
-		if self.alignmentMatrixNumRows < self.alignmentMatrixNumCols:
-			ans[1] = self.alignmentMatrix.index(max(self.alignmentMatrix[ans[0]]))
-		else:
-			cur = self.alignmentMatrix[0][ans[1]]
-			for i in xrange(self.alignmentMatrixNumCols):
-				if (self.alignmentMatrix[i][ans[1]] > cur):
-					cur = self.alignmentMatrix[i][ans[1]]
-					ans[0] = i
-		return ans
-
-	def getAlignmentScore(self):
-		if self.alignmentType == 'global':
-			return self.alignmentMatrix[-1][-1]
-		else:
-			ij = self.argmax();
-			return self.alignmentMatrix[ij[0]][ij[1]]
+def getAlignmentScore(scores, am):
+	if scores.edge == 0: # Semi-global
+		i, j = argmax(am)
+		return am[i][j]
+	else:
+		return am[-1][-1]

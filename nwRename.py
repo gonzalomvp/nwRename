@@ -45,14 +45,40 @@ parser.add_argument(
 "this file was called. Use only absolute paths.)",
 )
 parser.add_argument(
-	'--alignment',
-	'-a',
-	type=str,
-	default='semi-global',
-	dest='alignmentType',
-	nargs='?',
-	action='store',
-	help="Alignment type to be used.",
+    '--match',
+    type=int,
+    default=2,
+    dest='MATCH',
+    nargs='?',
+    action='store',
+    help="Match score to be used.",
+)
+parser.add_argument(
+    '--miss',
+    type=int,
+    default=-1,
+    dest='MISS',
+    nargs='?',
+    action='store',
+    help="Missatch score to be used.",
+)
+parser.add_argument(
+    '--gap',
+    type=int,
+    default=-1,
+    dest='GAP',
+    nargs='?',
+    action='store',
+    help="Gap score to be used.",
+)
+parser.add_argument(
+    '--edge',
+    type=int,
+    default=0,
+    dest='EDGE',
+    nargs='?',
+    action='store',
+    help="Edge score to be used (0 for semi-global, GAP for global).",
 )
 args = parser.parse_args()
 
@@ -63,8 +89,8 @@ def is_to_be_renamed(file):
 def abort(msg=''):
 	
 	raise SystemExit("Aborted.\n"+msg+"\nIf you think this shouldn't've " \
-"happened, try calling with \"-a global\"\nIf that doesn't help, please report"\
-" it to https://github.com/a442/")
+"happened, try calling with differen MATCH/MISS/GAP/EDGE values.\nIf that " \
+"doesn't help, please report it to https://github.com/a442/")
 
 def pair_up(files):
 	
@@ -79,10 +105,10 @@ def pair_up(files):
 	if total_to_rename > len(rename_to):
 		abort('There are more files to be renamed than files to rename to.')
 	aligned = []
+	scores_ = align.Scores(args.MATCH, args.MISS, args.GAP, args.EDGE)
 	done = 0
 	for ren_from in to_be_renamed:
-		alignments = [align.Alignment(ren_from, ren_to, alignmentType=args.alignmentType) for ren_to in rename_to]
-		scores = [a.getAlignmentScore() for a in alignments]
+		scores = [align.getAlignmentScore(scores_, align.generateAM(scores_, ren_from, ren_to)) for ren_to in rename_to]
 		chosen = scores.index(max(scores))
 		if not rename_to[chosen] in aligned:
 			aligned.append(rename_to[chosen])
